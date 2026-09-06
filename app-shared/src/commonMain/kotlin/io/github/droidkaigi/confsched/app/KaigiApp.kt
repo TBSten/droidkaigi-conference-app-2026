@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.retain.retain
+import io.github.droidkaigi.confsched.core.common.LocalTabReselectionEvents
 import io.github.droidkaigi.confsched.core.common.NavigatorEffect
 import io.github.droidkaigi.confsched.core.common.context
 import io.github.droidkaigi.confsched.core.designsystem.KaigiTheme
@@ -39,6 +40,7 @@ fun KaigiApp() {
         LocalErrorSceneOfLaunch provides appErrorScene,
         LocalPreviewImageResolver provides uiGraph.previewImageResolver,
         LocalSketchBaseSeed provides appSketchBaseSeed,
+        LocalTabReselectionEvents provides uiGraph.appNavigator.reselections,
     ) {
         SwrClientProvider(client = uiGraph.swrClient) {
             SoilDataBoundary(
@@ -69,13 +71,13 @@ fun KaigiApp() {
                         rootTabNavigator = appGraph.rootTabNavigator,
                         rootTabBarAppearance = appGraph.rootTabBarAppearance,
                         colorScheme = appearance.colorScheme,
-                        onSelectTab = { tab -> uiGraph.appNavigator.moveToTop(tab.key) },
+                        onSelectTab = { tab -> uiGraph.appNavigator.selectTab(tab.key) },
                     )
 
                     KaigiNavDisplay(
                         backStack = backStack,
                         onBack = uiGraph.appNavigator::back,
-                        onSelectTab = { tab -> uiGraph.appNavigator.moveToTop(tab.key) },
+                        onSelectTab = { tab -> uiGraph.appNavigator.selectTab(tab.key) },
                         entryProvider = uiGraph.appEntryProvider.entryProvider,
                     )
 

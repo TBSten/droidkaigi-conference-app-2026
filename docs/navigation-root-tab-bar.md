@@ -36,16 +36,17 @@ A scrollable root destination clears whichever is shown by adding `LocalNavigati
 
 ## Tab switching
 
-Tab taps are propagated out of the decorator as events; `KaigiApp` turns them into a single `AppNavigator.moveToTop(tab.key)` command, so the back stack is still mutated only in `NavigatorEffect`. `MoveToTop` **reorders instead of popping** — the deselected tab stays stashed on the stack, keeping its retained state across switches:
+Tab taps are propagated out of the decorator as events; `KaigiApp` turns them into a single `AppNavigator.selectTab(tab.key)` command, so the back stack is still mutated only in `NavigatorEffect`. `SelectTab` **reorders instead of popping** — the deselected tab stays stashed on the stack, keeping its retained state across switches:
 
 - selecting **About** from `[Timetable]` pushes it: `[Timetable, About]`;
 - selecting **Timetable** again reorders: `[About, Timetable]` — About survives underneath;
 - selecting **About** again: `[Timetable, About]`, with About's state intact.
+- selecting the tab that already sits on top reorders nothing — `NavigatorEffect` emits a reselection on `AppNavigator.reselections` instead, which a screen observes through `TabReselectEffect` to scroll its content back to the top.
 
 The selected item reflects the topmost root the current scene shows. Back falls out of the single stack via `NavDisplay`'s `onBack`: it reaches whichever root is stashed directly beneath the top one; from the home root it exits, even with a tab stashed beneath it, because [`RootSceneStrategy`](./navigation-predictive-back-tabs.md) empties its `previousEntries`.
 
 ## iOS
 
-On iOS the bar is native: `RootTabBarView`, a `UITabBar` overlaid on the Compose view controller, and `RootTabSceneDecorator` is not applied. Tab taps arrive through `RootTabNavigator` and land in the same `AppNavigator.moveToTop` path, so the back-stack semantics above hold unchanged. For details, see [Liquid Glass tab bar](./ios-liquid-glass.md).
+On iOS the bar is native: `RootTabBarView`, a `UITabBar` overlaid on the Compose view controller, and `RootTabSceneDecorator` is not applied. Tab taps arrive through `RootTabNavigator` and land in the same `AppNavigator.selectTab` path, so the back-stack semantics above hold unchanged. For details, see [Liquid Glass tab bar](./ios-liquid-glass.md).
 
 Related: [Root NavEntry emulation (RootSceneStrategy)](./navigation-predictive-back-tabs.md) · [Architecture overview](./architecture-overview.md) · [Entry retention (RetainNavEntryDecorator)](./navigation-retain-entry-decorator.md)

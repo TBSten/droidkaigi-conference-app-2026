@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import io.github.droidkaigi.confsched.core.common.TabReselectEffect
 import io.github.droidkaigi.confsched.core.model.KaigiColorScheme
 import io.github.droidkaigi.confsched.core.model.TimetableItemId
 import io.github.droidkaigi.confsched.core.preview.KaigiSchemeProvider
@@ -28,6 +29,7 @@ import io.github.droidkaigi.confsched.core.ui.TimetableItemCard
 import io.github.droidkaigi.confsched.core.ui.TimetableItemCardsFlowRow
 import io.github.droidkaigi.confsched.core.ui.TimetableTimeRange
 import io.github.droidkaigi.confsched.core.ui.current
+import io.github.droidkaigi.confsched.feature.sessions.timetable.TimetableNavKey
 
 @Composable
 internal fun TimetableListSection(
@@ -37,6 +39,7 @@ internal fun TimetableListSection(
     onItemClick: (TimetableItemId) -> Unit,
     listState: LazyListState,
 ) {
+    TabReselectEffect(TimetableNavKey) { listState.animateScrollToItem(0) }
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),

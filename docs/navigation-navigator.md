@@ -20,13 +20,14 @@ flowchart TD
 
 ## AppNavigator + NavigatorEffect (core)
 
-`AppNavigator` and `NavigatorEffect` are the primitive navigation mechanism, handling `NavCommand`s (`Push` / `Pop` / `MoveToTop`): `AppNavigator` emits them, and `NavigatorEffect` applies them to the back stack. `MoveToTop` is the [root tab bar](./navigation-root-tab-bar.md)'s command — it reorders the stack rather than popping it.
+`AppNavigator` and `NavigatorEffect` are the primitive navigation mechanism, handling `NavCommand`s (`Push` / `Pop` / `MoveToTop` / `SelectTab`): `AppNavigator` emits them, and `NavigatorEffect` applies them to the back stack. Both `MoveToTop` and `SelectTab` reorder the stack rather than popping it; they differ in what they do when the target key is already on top: `MoveToTop` is a no-op (used by deep links, which must not scroll the screen), while `SelectTab` emits a reselection on `AppNavigator.reselections`, which a screen observes through `TabReselectEffect` to scroll its content back to the top.
 
 ```kotlin
 sealed interface NavCommand {
     data class Push(val key: NavKey) : NavCommand
     data class Pop(val origin: NavKey?) : NavCommand
     data class MoveToTop(val key: NavKey) : NavCommand
+    data class SelectTab(val key: NavKey) : NavCommand
 }
 
 @Inject
@@ -34,9 +35,11 @@ sealed interface NavCommand {
 class AppNavigator(private val logger: KaigiLogger) : Navigator {
     private val commandChannel = Channel<NavCommand>(Channel.BUFFERED)
     val commands: Flow<NavCommand> = commandChannel.receiveAsFlow()
+    val reselections: Flow<NavKey> // emitted by NavigatorEffect when a SelectTab hits the top key
     fun goTo(key: NavKey) { commandChannel.trySend(NavCommand.Push(key)) }
     override fun back(origin: NavKey? = null) { commandChannel.trySend(NavCommand.Pop(origin)) }
     fun moveToTop(key: NavKey) { commandChannel.trySend(NavCommand.MoveToTop(key)) }
+    fun selectTab(key: NavKey) { commandChannel.trySend(NavCommand.SelectTab(key)) }
 }
 
 @Composable
@@ -76,6 +79,12 @@ fun NavigatorEffect(
                 is NavCommand.MoveToTop -> if (backStack.lastOrNull() != command.key) {
                     backStack.remove(command.key)
                     backStack.add(command.key)
+                }
+                is NavCommand.SelectTab -> if (backStack.lastOrNull() != command.key) {
+                    backStack.remove(command.key)
+                    backStack.add(command.key)
+                } else {
+                    navigator.reselect(command.key)
                 }
             }
         }
@@ -134,7 +143,7 @@ TimetableScreenRoot(
 )
 ```
 
-Because the binding is `@SingleIn` the screen's scope, resolving the navigator from the app or UI graph is a Metro compile error — the DI graph confines it to the NavEntry layer, stronger than a checker or convention. (Only the shell's own calls — the predictive back and the tab bar's moveToTop() — stay UI-scoped.)
+Because the binding is `@SingleIn` the screen's scope, resolving the navigator from the app or UI graph is a Metro compile error — the DI graph confines it to the NavEntry layer, stronger than a checker or convention. (Only the shell's own calls — the predictive back and the tab bar's `selectTab()` / deep-link `moveToTop()` — stay UI-scoped.)
 
 `graph` is the per-screen graph the NavEntry retains — see [NavEntry aggregation](./navigation-entry-aggregation.md) for how entries are registered and aggregated.
 

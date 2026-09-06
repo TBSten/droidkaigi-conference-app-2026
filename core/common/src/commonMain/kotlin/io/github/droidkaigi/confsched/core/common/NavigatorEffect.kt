@@ -54,6 +54,13 @@ fun NavigatorEffect(
                     backStack.add(command.key)
                 }
 
+                is NavCommand.SelectTab -> if (backStack.lastOrNull() != command.key) {
+                    backStack.remove(command.key)
+                    backStack.add(command.key)
+                } else {
+                    navigator.reselect(command.key)
+                }
+
                 is NavCommand.ReplaceTop -> if (backStack.isNotEmpty()) {
                     backStack[backStack.lastIndex] = command.key
                 }

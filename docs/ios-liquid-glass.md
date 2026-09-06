@@ -33,7 +33,7 @@ Scroll-driven bar behaviors are unavailable: Compose scrolling is invisible to U
 `RootTab` and `RootTabNavigator` (`:app-shared`, free of UI types) form the model both sides share:
 
 - **Kotlin → Swift**: `RootTabNavigator.currentTab: StateFlow<RootTab?>` drives the bar's selection; `null` (a non-tab entry on top, that is, a detail screen) hides the bar. Swift reaches it as `KaigiAppHost.currentTab: Flow<RootTabSelection?>`, the enum wrapped in a class because [Swift Export cannot carry an enum through a `Flow`](./ios-interop.md).
-- **Swift → Kotlin**: tab taps call `select(tab)`; `IosTabBarSyncEffect` (inside `KaigiApp`) turns each selection into `AppNavigator.moveToTop(tab.key)` — the same command the Compose bar issues on the other platforms.
+- **Swift → Kotlin**: tab taps call `select(tab)`; `IosTabBarSyncEffect` (inside `KaigiApp`) turns each selection into `AppNavigator.selectTab(tab.key)` — the same command the Compose bar issues on the other platforms.
 
 `RootTab.label` names each destination on both sides: the Compose bar gives it to its icon as a content description, and the native bar shows it under the icon as the tab's title. The icon has no shared form — Compose names a destination with a Material `ImageVector` and UIKit with an SF Symbol — so the symbol names live in the Swift bar.
 
