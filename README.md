@@ -1,3 +1,6 @@
+> [!NOTE]
+> 日本語話者向けに docs/ ディレクトリなどドキュメントが日本語訳されています。
+
 ![DroidKaigi 2026](assets/readme_header.png)
 
 # DroidKaigi 2026 official app
