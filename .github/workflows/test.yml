@@ -1,31 +1,10 @@
 name: Test
 
 on:
+  # No paths filter: :architecture-test checks every tracked file, so any added or moved file can fail it.
   pull_request:
-    paths:
-      - '**/*.kt'
-      - '**/*.kts'
-      - '**/*.java'
-      - '**/*.toml'
-      - '**/*.properties'
-      - '**/src/**/resources/**'
-      - 'core/data/openapi/**'
-      - 'gradle/wrapper/**'
-      - '.github/actions/setup-java/**'
-      - '.github/workflows/test.yml'
   push:
     branches: [main]
-    paths:
-      - '**/*.kt'
-      - '**/*.kts'
-      - '**/*.java'
-      - '**/*.toml'
-      - '**/*.properties'
-      - '**/src/**/resources/**'
-      - 'core/data/openapi/**'
-      - 'gradle/wrapper/**'
-      - '.github/actions/setup-java/**'
-      - '.github/workflows/test.yml'
 
 concurrency:
   group: test-${{ github.ref }}
